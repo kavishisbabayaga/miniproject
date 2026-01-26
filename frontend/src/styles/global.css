@@ -1,0 +1,183 @@
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: #0B1220;
+  color: #E6EDF3;
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+  line-height: 1.6;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 48px 24px;
+}
+
+.landing-container {
+  background: linear-gradient(135deg, #0B1220 0%, #0F1B2D 100%);
+  min-height: 100vh;
+  padding: 60px 24px;
+}
+
+.card {
+  background: #141F38;
+  border: 1px solid #1F2A44;
+  border-radius: 12px;
+  padding: 20px;
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  border-color: #2F81F7;
+  transform: translateY(-2px);
+}
+
+.feature-card {
+  text-align: center;
+}
+
+.feature-icon {
+  font-size: 32px;
+  margin-bottom: 12px;
+}
+
+.component-card {
+  background: #0F1B2D;
+}
+
+.btn {
+  background: #2F81F7;
+  color: white;
+  border: none;
+  padding: 12px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.btn:hover:not(:disabled) {
+  background: #1F6FEB;
+  transform: translateY(-1px);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background: #2F81F7;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: #1F6FEB;
+}
+
+.btn-secondary {
+  background: transparent;
+  border: 1px solid #1F2A44;
+  color: #E6EDF3;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  border-color: #2F81F7;
+  color: #2F81F7;
+}
+
+.btn-large {
+  padding: 14px 28px;
+  font-size: 16px;
+}
+
+.label {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: #2F81F7;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.hero-title {
+  font-size: 42px;
+  font-weight: 700;
+  margin: 16px 0;
+  line-height: 1.2;
+}
+
+.subtitle {
+  font-size: 16px;
+  color: #9AA4B2;
+  margin: 0;
+  line-height: 1.6;
+}
+
+.small-text {
+  font-size: 13px;
+  color: #9AA4B2;
+  margin: 8px 0 0 0;
+}
+
+.muted {
+  color: #9AA4B2;
+}
+
+.grid {
+  display: grid;
+  gap: 20px;
+}
+
+.download-section {
+  display: flex;
+  justify-content: center;
+  margin: 40px 0;
+}
+
+.download-section .card {
+  max-width: 800px;
+  width: 100%;
+}
+
+.link {
+  color: #2F81F7;
+  text-decoration: none;
+  font-size: 14px;
+  transition: color 0.3s ease;
+}
+
+.link:hover {
+  color: #1F6FEB;
+}
+
+h1, h2, h3 {
+  margin: 0;
+  color: #E6EDF3;
+}
+
+h1 {
+  font-size: 36px;
+  font-weight: 700;
+}
+
+h2 {
+  font-size: 24px;
+  font-weight: 600;
+}
+
+h3 {
+  font-size: 20px;
+  font-weight: 600;
+}
+
+strong {
+  color: #E6EDF3;
+  font-weight: 600;
+}
