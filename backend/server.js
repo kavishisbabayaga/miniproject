@@ -1,7 +1,13 @@
 const express = require("express");
 const cors = require("cors");
+const http = require("http");
+const WebSocket = require("ws");
+const evaluateDevice = require("./services/evaluateDevice");
+const SystemMonitor = require("./services/systemMonitor");
 
 const app = express();
+const server = http.createServer(app);
+const wss = new WebSocket.Server({ server });
 const PORT = 3000;
 
 app.use(cors());
@@ -11,6 +17,89 @@ app.use(express.json());
 let processing = false;
 let lastReport = null;
 let activityLog = []; // Store activity events for live graph
+let monitoringInterval = null;
+const connectedClients = new Set();
+
+// ---- Real-time monitoring ----
+function startLiveMonitoring() {
+  if (monitoringInterval) return;
+
+  monitoringInterval = setInterval(async () => {
+    try {
+      const metrics = await SystemMonitor.getSystemMetrics();
+      if (metrics) {
+        const report = evaluateDevice(metrics);
+        lastReport = report;
+
+        const activity = {
+          timestamp: metrics.timestamp,
+          type: "monitoring",
+          cpu_usage: metrics.cpu_usage,
+          ram_gb: metrics.ram_gb,
+          storage_health: metrics.storage_health,
+          battery_health: metrics.battery_health
+        };
+        activityLog.push(activity);
+
+        if (activityLog.length > 100) {
+          activityLog.shift();
+        }
+
+        // Broadcast to all connected WebSocket clients
+        const message = JSON.stringify({
+          type: "update",
+          data: report,
+          metrics
+        });
+
+        connectedClients.forEach((client) => {
+          if (client.readyState === WebSocket.OPEN) {
+            client.send(message);
+          }
+        });
+      }
+    } catch (error) {
+      console.error("Error in live monitoring:", error.message);
+    }
+  }, 2000); // Update every 2 seconds
+}
+
+function stopLiveMonitoring() {
+  if (monitoringInterval) {
+    clearInterval(monitoringInterval);
+    monitoringInterval = null;
+  }
+}
+
+// ---- WebSocket connection handling ----
+wss.on("connection", (ws) => {
+  connectedClients.add(ws);
+  console.log("Client connected. Total clients:", connectedClients.size);
+
+  // Send current data immediately
+  if (lastReport) {
+    ws.send(JSON.stringify({ type: "update", data: lastReport }));
+  }
+
+  // Start monitoring if this is the first client
+  if (connectedClients.size === 1) {
+    startLiveMonitoring();
+  }
+
+  ws.on("close", () => {
+    connectedClients.delete(ws);
+    console.log("Client disconnected. Total clients:", connectedClients.size);
+
+    // Stop monitoring if no clients
+    if (connectedClients.size === 0) {
+      stopLiveMonitoring();
+    }
+  });
+
+  ws.on("error", (error) => {
+    console.error("WebSocket error:", error.message);
+  });
+});
 
 // ---- Submit diagnostics (from script) ----
 app.post("/api/submit-diagnostics", (req, res) => {
@@ -34,20 +123,8 @@ app.post("/api/submit-diagnostics", (req, res) => {
     activityLog.shift();
   }
 
-  // RULE-BASED, DETERMINISTIC (simple for now)
-  const report = {
-    components: {
-      cpu: { health: input.cpu_usage > 70 ? "GOOD" : "FAIR", score: 25 },
-      ram: { health: input.ram_gb >= 8 ? "GOOD" : "FAIR", score: 20 },
-      storage: { health: "GOOD", score: 30 },
-      battery: { health: "GOOD", score: 15 },
-      motherboard: { health: "GOOD", score: 10 }
-    },
-    overall: {
-      health: "REUSABLE_WITH_CHECK",
-      total_score: 100
-    }
-  };
+  // Use real device evaluation with health rules
+  const report = evaluateDevice(input);
 
   // simulate processing delay
   setTimeout(() => {
@@ -341,6 +418,7 @@ app.get("/", (req, res) => {
   res.send("Backend running");
 });
 
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`Backend running at http://localhost:${PORT}`);
+  console.log(`WebSocket server running on ws://localhost:${PORT}`);
 });
